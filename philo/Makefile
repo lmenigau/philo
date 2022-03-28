@@ -1,6 +1,6 @@
 SRC		=  main.c parse_int.c
 OBJ		= $(SRC:.c=.o)
-CFLAGS	= -g -fsanitize=thread -Wall -Wextra
+CFLAGS	= -O2 -g -fsanitize=thread -Wall -Wextra
 NAME	= philo
 CC		= clang
 ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'

@@ -17,25 +17,28 @@ void	*philosopher(t_philo *philo)
 	int		i;
 
 	i = 0;
-	while (i < 10)
+	while (i < 1000)
 	{
-		printf("%ld %d is thinking\n", micro_ts(), philo->id);
-
+		printf("%ld %d is thinking\n", micro_ts()/1000, philo->id);
 		if (philo->id & 1)
 		{
 			pthread_mutex_lock(&philo->forks[philo->id]);
+			printf("%ld %d as taken a fork\n", micro_ts()/1000, philo->id);
+
 			pthread_mutex_lock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
+			printf("%ld %d as taken a fork\n", micro_ts()/1000, philo->id);
 		}
 		else
 		{
 			pthread_mutex_lock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
 			pthread_mutex_lock(&philo->forks[philo->id]);
 		}
+		philo->last_meal = micro_ts();;
 		usleep(philo->info->time_to_eat);
-		printf("%ld %d is eating\n", micro_ts(), philo->id);
+		printf("%ld %d is eating\n", micro_ts()/1000, philo->id);
 		pthread_mutex_unlock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
 		pthread_mutex_unlock(&philo->forks[philo->id]);
-		printf("%ld %d is sleeping\n", micro_ts(), philo->id);
+		printf("%ld %d is sleeping\n", micro_ts()/1000, philo->id);
 		usleep(philo->info->time_to_sleep);
 		i++;
 	}
