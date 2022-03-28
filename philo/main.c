@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/time.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "philo.h"
 
@@ -13,9 +14,31 @@ long	micro_ts(void)
 
 void	*philosopher(t_philo *philo)
 {
-	printf("%ld %d is thinking\n", micro_ts(), philo->id);
+	int		i;
 
-	usleep(philo->info->time_to_sleep);
+	i = 0;
+	while (i < 10)
+	{
+		printf("%ld %d is thinking\n", micro_ts(), philo->id);
+
+		if (philo->id & 1)
+		{
+			pthread_mutex_lock(&philo->forks[philo->id]);
+			pthread_mutex_lock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
+		}
+		else
+		{
+			pthread_mutex_lock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
+			pthread_mutex_lock(&philo->forks[philo->id]);
+		}
+		usleep(philo->info->time_to_eat);
+		printf("%ld %d is eating\n", micro_ts(), philo->id);
+		pthread_mutex_unlock(&philo->forks[philo->id + 1 % philo->info->number_of_philosophers]);
+		pthread_mutex_unlock(&philo->forks[philo->id]);
+		printf("%ld %d is sleeping\n", micro_ts(), philo->id);
+		usleep(philo->info->time_to_sleep);
+		i++;
+	}
 	return (NULL);
 }
 
@@ -26,6 +49,12 @@ void	launch(t_info *info, t_philo *philos, t_mutex *forks)
 	i = 0;
 	while (i < info->number_of_philosophers)
 	{
+		pthread_mutex_init(&forks[i], NULL);
+		i++;
+	}
+	i = 0;
+	while (i < info->number_of_philosophers)
+	{
 		philos[i].id = i;
 		philos[i].forks = forks;
 		philos[i].info = info;
@@ -33,18 +62,19 @@ void	launch(t_info *info, t_philo *philos, t_mutex *forks)
 				(void *(*)(void *))philosopher, &philos[i]);
 		i++;
 	}
-	while (i >= 0)
+	i = 0;
+	while (i < info->number_of_philosophers)
 	{
 		pthread_join(philos[i].thread, NULL);
-		i--;
+		i++;
 	}
 }
 
 int		main(int ac, char **av)
 {
 	static t_info	info;
-	static t_philo	philos[100];
-	static t_mutex	forks[100];
+	t_philo			*philos;
+	t_mutex			*forks;
 
 	if (ac < 2)
 		printf("missing number_of_philosophers\n");
@@ -61,5 +91,7 @@ int		main(int ac, char **av)
 	info.time_to_eat = parse_int(av[3]) * 1000;
 	info.time_to_sleep = parse_int(av[4]) * 1000;
 	info.start = micro_ts();
+	forks = malloc(sizeof(*forks) * info.number_of_philosophers);
+	philos = malloc(sizeof(*philos) * info.number_of_philosophers);
 	launch(&info, philos, forks); 
 }
