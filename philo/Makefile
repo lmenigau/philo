@@ -1,6 +1,6 @@
 SRC		=  main.c parse_int.c
 OBJ		= $(SRC:.c=.o)
-CFLAGS	= -O2 -g -fsanitize=thread -Wall -Wextra
+CFLAGS	= -O3 -g -fsanitize=thread -Wall -Wextra
 NAME	= philo
 CC		= clang
 ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'
@@ -8,7 +8,7 @@ ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'
 endif
 
 $(NAME) : $(OBJ) 
-	$(CC)  -o $(NAME) $(CFLAGS) $(OBJ) 
+	$(CC)  -o $(NAME) $(CFLAGS) $(OBJ) -lpthread 
 
 .PHONY	: re clean fclean all
 
