@@ -65,39 +65,52 @@ int		check_dead(t_philo *philo)
 			return (0);
 		}
 		pthread_mutex_unlock(&philo->info->exit_l);
+		usleep(1000);
 		return (1);
 }
 
 int		take_fork(t_philo *philo)
 {
-		pthread_mutex_lock(&philo->forks[philo->id].lock);
-		if (philo->forks[philo->id].taken)
+		int id;
+
+		if (philo->id & 1)
+			id = philo->id; 
+		else
+			id = (philo->id + 1) % philo->info->maxphil; 
+		pthread_mutex_lock(&philo->forks[id].lock);
+		if (philo->forks[id].taken)
 		{
-			pthread_mutex_unlock(&philo->forks[philo->id].lock);
+			pthread_mutex_unlock(&philo->forks[id].lock);
 			return (0);
 		}
 		else
 		{
-			philo->forks[philo->id].taken = 1;
-			pthread_mutex_unlock(&philo->forks[philo->id].lock);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
+			philo->forks[id].taken = 1;
+			pthread_mutex_unlock(&philo->forks[id].lock);
+			printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
 			return (1);
 		}
 }
 
 int		take_fork2(t_philo *philo)
 {
-		pthread_mutex_lock(&philo->forks[philo->id + 1 % philo->info->maxphil].lock);
-		if (philo->forks[(philo->id + 1) % philo->info->maxphil].taken)
+		int id;
+
+		if (philo->id & 1)
+			id = (philo->id + 1) % philo->info->maxphil; 
+		else
+			id = philo->id; 
+		pthread_mutex_lock(&philo->forks[id].lock);
+		if (philo->forks[id].taken)
 		{
-			pthread_mutex_unlock(&philo->forks[philo->id].lock);
+			pthread_mutex_unlock(&philo->forks[id].lock);
 			return (0);
 		}
 		else
 		{
-			philo->forks[(philo->id + 1) % philo->info->maxphil].taken = 1;
-			pthread_mutex_unlock(&philo->forks[philo->id + 1 % philo->info->maxphil].lock);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
+			philo->forks[id].taken = 1;
+			pthread_mutex_unlock(&philo->forks[id].lock);
+			printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
 			return (1);
 		}
 }
@@ -115,12 +128,21 @@ void	philosopher(t_philo *philo)
 			philo->last_meal = micro_ts();
 			printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
 			usleep(philo->info->time_to_eat);
+
+			pthread_mutex_lock(&philo->forks[(philo->id + 1) % philo->info->maxphil].lock);
+			philo->forks[(philo->id + 1) % philo->info->maxphil].taken = 0;
+			pthread_mutex_unlock(&philo->forks[(philo->id + 1) % philo->info->maxphil].lock);
+
+			pthread_mutex_lock(&philo->forks[philo->id].lock);
+			philo->forks[philo->id].taken = 0;
+			pthread_mutex_unlock(&philo->forks[philo->id].lock);
 			philo->state = sleeping;
 		}
 		else if (philo->state == sleeping)
 		{
 			printf("%5ld %d is sleeping\n", micro_ts()/1000, philo->id);
 			usleep(philo->info->time_to_sleep);
+			philo->state = fork1;
 		}
 	}
 }
