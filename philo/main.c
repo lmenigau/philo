@@ -8,7 +8,7 @@ long	micro_ts(void)
 {
 	static long		start;
 	long			ts;
-	struct timeval	tm;	
+	struct timeval	tm;
 
 	gettimeofday(&tm, NULL);
 	ts = tm.tv_sec * 1000000 + tm.tv_usec;
@@ -51,68 +51,68 @@ void	long_write(t_mutex *lock, long *ptr, long val)
 
 int		check_dead(t_philo *philo)
 {
-		pthread_mutex_lock(&philo->info->exit_l);
-		if (philo->info->exit)
-		{
-			pthread_mutex_unlock(&philo->info->exit_l);
-			return (0);
-		}
-		else if (micro_ts() - philo->last_meal > philo->info->time_to_die)
-		{
-			philo->info->exit = 1;
-			pthread_mutex_unlock(&philo->info->exit_l);
-			printf("%5ld %d died\n", micro_ts() / 1000, philo->id);
-			return (0);
-		}
+	pthread_mutex_lock(&philo->info->exit_l);
+	if (philo->info->exit)
+	{
 		pthread_mutex_unlock(&philo->info->exit_l);
-		usleep(1000);
-		return (1);
+		return (0);
+	}
+	else if (micro_ts() - philo->last_meal > philo->info->time_to_die)
+	{
+		philo->info->exit = 1;
+		pthread_mutex_unlock(&philo->info->exit_l);
+		printf("%5ld %d died\n", micro_ts() / 1000, philo->id);
+		return (0);
+	}
+	pthread_mutex_unlock(&philo->info->exit_l);
+	usleep(1000);
+	return (1);
 }
 
 int		take_fork(t_philo *philo)
 {
-		int id;
+	int id;
 
-		if (philo->id & 1)
-			id = philo->id; 
-		else
-			id = (philo->id + 1) % philo->info->maxphil; 
-		pthread_mutex_lock(&philo->forks[id].lock);
-		if (philo->forks[id].taken)
-		{
-			pthread_mutex_unlock(&philo->forks[id].lock);
-			return (0);
-		}
-		else
-		{
-			philo->forks[id].taken = 1;
-			pthread_mutex_unlock(&philo->forks[id].lock);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
-			return (1);
-		}
+	if (philo->id & 1)
+		id = philo->id;
+	else
+		id = (philo->id + 1) % philo->info->maxphil;
+	pthread_mutex_lock(&philo->forks[id].lock);
+	if (philo->forks[id].taken)
+	{
+		pthread_mutex_unlock(&philo->forks[id].lock);
+		return (0);
+	}
+	else
+	{
+		philo->forks[id].taken = 1;
+		pthread_mutex_unlock(&philo->forks[id].lock);
+		printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
+		return (1);
+	}
 }
 
 int		take_fork2(t_philo *philo)
 {
-		int id;
+	int id;
 
-		if (philo->id & 1)
-			id = (philo->id + 1) % philo->info->maxphil; 
-		else
-			id = philo->id; 
-		pthread_mutex_lock(&philo->forks[id].lock);
-		if (philo->forks[id].taken)
-		{
-			pthread_mutex_unlock(&philo->forks[id].lock);
-			return (0);
-		}
-		else
-		{
-			philo->forks[id].taken = 1;
-			pthread_mutex_unlock(&philo->forks[id].lock);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
-			return (1);
-		}
+	if (philo->id & 1)
+		id = (philo->id + 1) % philo->info->maxphil;
+	else
+		id = philo->id;
+	pthread_mutex_lock(&philo->forks[id].lock);
+	if (philo->forks[id].taken)
+	{
+		pthread_mutex_unlock(&philo->forks[id].lock);
+		return (0);
+	}
+	else
+	{
+		philo->forks[id].taken = 1;
+		pthread_mutex_unlock(&philo->forks[id].lock);
+		printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
+		return (1);
+	}
 }
 
 void	philosopher(t_philo *philo)
@@ -238,7 +238,7 @@ int		main(int ac, char **av)
 	info.exit = 0;
 	forks = malloc(sizeof(*forks) * info.maxphil);
 	philos = malloc(sizeof(*philos) * info.maxphil);
-	launch(&info, philos, forks); 
+	launch(&info, philos, forks);
 	free(forks);
 	free(philos);
 }
