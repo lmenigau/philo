@@ -118,20 +118,6 @@ int		take_fork2(t_philo *philo)
 	}
 	else
 		return 0;
-#if 0 
-	pthread_mutex_lock(&philo->forks[id].lock);
-	if (philo->forks[id].taken)
-	{
-		pthread_mutex_unlock(&philo->forks[id].lock);
-		return (0);
-	}
-	else
-	{
-		philo->forks[id].taken = 1;
-		pthread_mutex_unlock(&philo->forks[id].lock);
-		return (1);
-	}
-#endif
 }
 
 void	philosopher(t_philo *philo)
@@ -160,42 +146,6 @@ void	philosopher(t_philo *philo)
 		}
 	}
 }
-
-#if 0
-void	*philosopherold(t_philo *philo)
-{
-	int		i;
-
-	i  = 0;
-	while (!int_read(&philo->info->exit_l, &philo->info->exit))
-	{
-		if (philo->id & 1)
-		{
-			pthread_mutex_lock(&philo->forks[philo->id]);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
-			pthread_mutex_lock(&philo->forks[(philo->id + 1) % philo->info->maxphil]);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
-		}
-		else
-		{
-			pthread_mutex_lock(&philo->forks[(philo->id + 1) % philo->info->maxphil]);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
-			pthread_mutex_lock(&philo->forks[philo->id]);
-			printf("%5ld %d has taken a fork\n", micro_ts()/1000, philo->id);
-		}
-		long_write(&philo->lock, &philo->last_meal, micro_ts());
-		printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
-		usleep(philo->info->time_to_eat);
-		pthread_mutex_unlock(&philo->forks[(philo->id + 1) % philo->info->maxphil]);
-		pthread_mutex_unlock(&philo->forks[philo->id]);
-		printf("%5ld %d is sleeping\n", micro_ts()/1000, philo->id);
-		usleep(philo->info->time_to_sleep);
-		printf("%5ld %d is thinking\n", micro_ts()/1000, philo->id);
-		i++;
-	}
-	return (NULL);
-}
-#endif
 
 void	launch(t_info *info, t_philo *philos, t_fork *forks)
 {
