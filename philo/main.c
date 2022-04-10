@@ -107,8 +107,8 @@ void	take_fork(t_philo *philo)
 		}
 		else
 		{
-			philo->left->ts_release = micro_ts() + philo->info->time_to_eat;
-			philo->right->ts_release = micro_ts() + philo->info->time_to_eat;
+			philo->left->ts_release = micro_ts() + philo->info->eat_time;
+			philo->right->ts_release = micro_ts() + philo->info->eat_time;
 			pthread_mutex_unlock(&philo->left->lock);
 			pthread_mutex_unlock(&philo->right->lock);
 		}
@@ -132,7 +132,8 @@ void	philosopher(t_philo *philo)
 		printf("%5ld %d has taken fork\n", micro_ts()/1000, philo->id);
 		printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
 		philo->ts_dead = micro_ts() + philo->info->time_to_die;
-		long	s = long_min(philo->ts_dead - micro_ts(), philo->info->time_to_eat);
+		long s;
+		s = long_min(philo->ts_dead - micro_ts(), philo->info->eat_time);
 		usleep(s);
 		long_write(&philo->left->lock, &philo->left->ts_release, 0);
 		long_write(&philo->right->lock, &philo->right->ts_release, 0);
@@ -195,14 +196,14 @@ int		main(int ac, char **av)
 	if (ac < 3)
 		printf("missing time_to_die\n");
 	if (ac < 4)
-		printf("missing time_to_eat\n");
+		printf("missing eat_time\n");
 	if (ac < 5)
 		printf("missing sleep_time\n");
 	if (ac < 5)
 		return (1);
 	info.maxphil = parse_int(av[1]);
 	info.time_to_die = parse_int(av[2]) * 1000;
-	info.time_to_eat = parse_int(av[3]) * 1000;
+	info.eat_time = parse_int(av[3]) * 1000;
 	info.sleep_time = parse_int(av[4]) * 1000;
 	info.start = micro_ts();
 	info.exit = 0;

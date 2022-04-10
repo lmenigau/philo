@@ -16,7 +16,7 @@ typedef struct s_info {
 	t_mutex		exit_l;
 	long		start;
 	long		time_to_die;
-	long		time_to_eat;
+	long		eat_time;
 	long		sleep_time;
 	int			maxphil;
 	int			number_of_times_each_philosopher_must_eat;
