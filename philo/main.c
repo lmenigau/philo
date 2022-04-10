@@ -57,7 +57,7 @@ int		check_dead(t_philo *philo)
 		pthread_mutex_unlock(&philo->info->exit_l);
 		return (0);
 	}
-	else if (micro_ts() - philo->last_meal > philo->info->time_to_die)
+	else if (micro_ts() > philo->ts_dead)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
@@ -65,7 +65,6 @@ int		check_dead(t_philo *philo)
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
-	usleep(1000);
 	return (1);
 }
 
@@ -85,65 +84,62 @@ int		test_and_set(t_mutex *lock, int *val)
 	}
 }
 
-int		take_fork(t_philo *philo)
+void	take_fork(t_philo *philo)
 {
-	int id;
+	long ts_release;
 
-	if (philo->id & 1)
-		id = philo->id;
-	else
-		id = (philo->id + 1) % philo->info->maxphil;
-
-	if (test_and_set(&philo->forks[id].lock, &philo->forks[id].taken))
+	pthread_mutex_lock(&philo->left->lock);
+	ts_release = philo->left->ts_release;
+	if (ts_release > micro_ts())
 	{
-		printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
-		return 1;
+		pthread_mutex_unlock(&philo->left->lock);
+		usleep(ts_release - micro_ts()); 
 	}
 	else
-		return 0;
+	{
+		pthread_mutex_lock(&philo->right->lock);
+		ts_release = philo->right->ts_release;
+		if (ts_release > micro_ts())
+		{
+			pthread_mutex_unlock(&philo->left->lock);
+			pthread_mutex_unlock(&philo->right->lock);
+			usleep(ts_release - micro_ts()); 
+		}
+		else
+		{
+			philo->left->ts_release = micro_ts() + philo->info->time_to_eat;
+			philo->right->ts_release = micro_ts() + philo->info->time_to_eat;
+			pthread_mutex_unlock(&philo->left->lock);
+			pthread_mutex_unlock(&philo->right->lock);
+		}
+	}
 }
 
-int		take_fork2(t_philo *philo)
+long	long_min(long a, long b)
 {
-	int id;
-
-	if (philo->id & 1)
-		id = (philo->id + 1) % philo->info->maxphil;
+	if (a < b)
+		return a;
 	else
-		id = philo->id;
-	if (test_and_set(&philo->forks[id].lock, &philo->forks[id].taken))
-	{
-		printf("%5ld %d has taken a fork\n", micro_ts()/1000, id);
-		return 1;
-	}
-	else
-		return 0;
+		return b;
 }
 
 void	philosopher(t_philo *philo)
 {
 	while (check_dead(philo))
 	{
-		if (philo->state == fork1 && take_fork(philo))
-			philo->state = fork2;
-		else if (philo->state == fork2 && take_fork2(philo))
-			philo->state = eating;
-		else if (philo->state == eating)
-		{
-			philo->last_meal = micro_ts();
-			printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
-			usleep(philo->info->time_to_eat);
-			int_write(&philo->forks[philo->id].lock, &philo->forks[philo->id].taken, 0);
-			int_write(&philo->forks[(philo->id + 1) % philo->info->maxphil].lock,
-					&philo->forks[(philo->id + 1) % philo->info->maxphil].taken, 0);
-			philo->state = sleeping;
-		}
-		else if (philo->state == sleeping)
-		{
-			printf("%5ld %d is sleeping\n", micro_ts()/1000, philo->id);
-			usleep(philo->info->time_to_sleep);
-			philo->state = fork1;
-		}
+		take_fork(philo);
+		printf("%5ld %d has taken fork\n", micro_ts()/1000, philo->id);
+		printf("%5ld %d has taken fork\n", micro_ts()/1000, philo->id);
+		printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
+		philo->ts_dead = micro_ts() + philo->info->time_to_die;
+		long	s = long_min(philo->ts_dead - micro_ts(), philo->info->time_to_eat);
+		usleep(s);
+		long_write(&philo->left->lock, &philo->left->ts_release, 0);
+		long_write(&philo->right->lock, &philo->right->ts_release, 0);
+		printf("%5ld %d is sleeping\n", micro_ts()/1000, philo->id);
+		s = long_min(philo->ts_dead - micro_ts(), philo->info->sleep_time);
+		usleep(s);
+		printf("%5ld %d is thinking\n", micro_ts()/1000, philo->id);
 	}
 }
 
@@ -154,7 +150,7 @@ void	launch(t_info *info, t_philo *philos, t_fork *forks)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		forks[i].taken = 0;
+		forks[i].ts_release = 0;
 		pthread_mutex_init(&forks[i].lock, NULL);
 		i++;
 	}
@@ -162,12 +158,22 @@ void	launch(t_info *info, t_philo *philos, t_fork *forks)
 	while (i < info->maxphil)
 	{
 		philos[i].id = i;
-		philos[i].forks = forks;
 		philos[i].info = info;
+		if (i & 1)
+		{
+			philos[i].left = &forks[i];
+			philos[i].right = &forks[(i + 1) % info->maxphil];
+		}
+		else
+		{
+			philos[i].right = &forks[i];
+			philos[i].left = &forks[(i + 1) % info->maxphil];
+		}
 		philos[i].last_meal = 0;
-		pthread_mutex_init(&philos[i].lock, NULL);
+		philos[i].ts_dead = info->time_to_die;
+		philos[i].state = fork1;
 		pthread_create(&philos[i].thread, NULL,
-				(void *(*)(void *))philosopher, &philos[i]);
+				(void *)philosopher, &philos[i]);
 		i++;
 	}
 	i = 0;
@@ -191,13 +197,13 @@ int		main(int ac, char **av)
 	if (ac < 4)
 		printf("missing time_to_eat\n");
 	if (ac < 5)
-		printf("missing time_to_sleep\n");
+		printf("missing sleep_time\n");
 	if (ac < 5)
 		return (1);
 	info.maxphil = parse_int(av[1]);
 	info.time_to_die = parse_int(av[2]) * 1000;
 	info.time_to_eat = parse_int(av[3]) * 1000;
-	info.time_to_sleep = parse_int(av[4]) * 1000;
+	info.sleep_time = parse_int(av[4]) * 1000;
 	info.start = micro_ts();
 	info.exit = 0;
 	forks = malloc(sizeof(*forks) * info.maxphil);

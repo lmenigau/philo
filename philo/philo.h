@@ -9,6 +9,7 @@ typedef struct s_fork
 {
 	t_mutex		lock;
 	int			taken;
+	long		ts_release;
 }				t_fork;
 
 typedef struct s_info {
@@ -16,10 +17,10 @@ typedef struct s_info {
 	long		start;
 	long		time_to_die;
 	long		time_to_eat;
-	long		time_to_sleep;
+	long		sleep_time;
 	int			maxphil;
 	int			number_of_times_each_philosopher_must_eat;
-	int			exit;
+	volatile int	exit;
 }				t_info;
 
 enum e_state {
@@ -32,12 +33,14 @@ enum e_state {
 typedef struct s_philo
 {
 	pthread_t	thread;
-	t_mutex		lock;
-	t_fork		*forks;
 	t_info		*info;
+	t_fork		*left;
+	t_fork		*right;
+	t_fork		*forks;
+	long		last_meal;
+	long		ts_dead;
 	int			state;
 	int			counter;
-	long		last_meal;
 	int			id;
 }				t_philo;
 
