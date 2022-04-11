@@ -14,6 +14,7 @@ typedef struct s_fork
 
 typedef struct s_info {
 	t_mutex		exit_l;
+	t_fork		*forks;
 	long		start;
 	long		time_to_die;
 	long		eat_time;

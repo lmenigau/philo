@@ -86,13 +86,14 @@ int		test_and_set(t_mutex *lock, int *val)
 
 void	sleep_until(t_philo *philo, long ts)
 {
-		if (ts < philo->ts_dead)
-			usleep(ts - micro_ts());
-		else
-		{
-			usleep(philo->ts_dead - micro_ts());
-			philo->alive = 0;
-		}
+	if (ts < philo->ts_dead)
+		usleep(ts - micro_ts());
+	else
+	{
+		usleep(philo->ts_dead - micro_ts());
+		philo->alive = 0;
+	}
+
 }
 
 void	take_fork2(t_philo *philo)
@@ -143,7 +144,6 @@ long	long_min(long a, long b)
 
 void	philosopher(t_philo *philo)
 {
-	philo->alive = 1;
 	while (philo->alive)
 	{
 		if (philo->state == hungry)
@@ -169,17 +169,29 @@ void	philosopher(t_philo *philo)
 	}
 }
 
-void	launch(t_info *info, t_philo *philos, t_fork *forks)
+t_fork		*init_forks(t_info *info)
 {
-	int		i;
+	int			i;
+	t_fork		*forks;
 
+	forks = malloc(sizeof(*forks) * info->maxphil);
+	if (!forks)
+		return (NULL);
 	i = 0;
 	while (i < info->maxphil)
 	{
 		forks[i].ts_release = 0;
-		pthread_mutex_init(&forks[i].lock, NULL);
+		if (pthread_mutex_init(&forks[i].lock, NULL))
+			return (NULL);
 		i++;
 	}
+	return (forks);
+}
+
+void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
+{
+	int		i;
+
 	i = 0;
 	while (i < info->maxphil)
 	{
@@ -195,6 +207,7 @@ void	launch(t_info *info, t_philo *philos, t_fork *forks)
 			philos[i].right = &forks[i];
 			philos[i].left = &forks[(i + 1) % info->maxphil];
 		}
+		philos[i].alive = 1;
 		philos[i].last_meal = 0;
 		philos[i].ts_dead = info->time_to_die;
 		philos[i].state = hungry;
@@ -202,19 +215,32 @@ void	launch(t_info *info, t_philo *philos, t_fork *forks)
 				(void *)philosopher, &philos[i]);
 		i++;
 	}
+}
+
+int		wait_philos(t_info *info, t_fork *forks)
+{
+	t_philo		*philos;
+	int			i;
+
 	i = 0;
+	philos = malloc(sizeof(*philos) * info->maxphil);
+	if (!philos) {
+		return (1);
+	}
+	create_philos(info, philos, forks);
 	while (i < info->maxphil)
 	{
 		pthread_join(philos[i].thread, NULL);
 		i++;
 	}
+	free(forks);
+	free(philos);
+	return (0);
 }
 
 int		main(int ac, char **av)
 {
 	static t_info	info;
-	t_philo			*philos;
-	t_fork			*forks;
 
 	if (ac < 2)
 		printf("missing maxphil\n");
@@ -232,9 +258,5 @@ int		main(int ac, char **av)
 	info.sleep_time = parse_int(av[4]) * 1000;
 	info.start = micro_ts();
 	info.exit = 0;
-	forks = malloc(sizeof(*forks) * info.maxphil);
-	philos = malloc(sizeof(*philos) * info.maxphil);
-	launch(&info, philos, forks);
-	free(forks);
-	free(philos);
+	return (wait_philos(&info, init_forks(&info)));
 }
