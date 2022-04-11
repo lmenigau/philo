@@ -24,10 +24,11 @@ typedef struct s_info {
 }				t_info;
 
 enum e_state {
-	fork1,
-	fork2,
+	hungry,
 	eating,
 	sleeping,
+	thinking,
+	total_state
 };
 
 typedef struct s_philo
@@ -42,6 +43,7 @@ typedef struct s_philo
 	int			state;
 	int			counter;
 	int			id;
+	int			alive;
 }				t_philo;
 
 int		parse_int(char *str);
