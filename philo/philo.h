@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 18:57:55 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 23:25:40 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ typedef struct s_info {
 
 enum e_state {
 	hungry,
+	lock1,
+	lock2,
 	eating,
 	sleeping,
 	thinking,
@@ -60,7 +62,7 @@ typedef struct s_philo
 int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
-void	take_fork(t_philo *philo);
+int		take_fork(t_fork *locki, int id);
 long	micro_ts(void);
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, int id);

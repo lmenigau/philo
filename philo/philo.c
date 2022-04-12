@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 18:59:33 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 23:41:15 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	check_dead(t_philo *philo)
 		pthread_mutex_unlock(&philo->info->exit_l);
 		return (0);
 	}
-	else if (philo->alive == 0)
+	else if (micro_ts() > philo->ts_dead)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
@@ -52,6 +52,7 @@ int	check_dead(t_philo *philo)
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
+	usleep(1000);
 	return (1);
 }
 
@@ -77,22 +78,22 @@ void	philosopher(t_philo *philo)
 {
 	while (check_dead(philo))
 	{
-		if (philo->state == hungry)
-			take_fork(philo);
+		if (philo->state == lock1 && !take_fork(philo->left, philo->id))
+				philo->state--;
+		if (philo->state == lock2 && !take_fork(philo->right, philo->id))
+				philo->state--;
 		else if (philo->state == eating)
 		{
-			ex_print("%1$5ld %2$3d has taken a fork\n"
-				"%1$5ld %2$3d has taken a fork\n" "%1$5ld %2$3d is eating\n",
-				philo->id);
+			ex_print("%5ld %3d is eating\n", philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, micro_ts() + philo->info->eat_time);
 		}
 		else if (philo->state == sleeping)
 		{
-			long_write(&philo->left->lock, &philo->left->ts_release, 0);
-			long_write(&philo->right->lock, &philo->right->ts_release, 0);
 			if (--philo->counter == 0)
 				break ;
+			long_write(&philo->left->lock, &philo->left->ts_release, 0);
+			long_write(&philo->right->lock, &philo->right->ts_release, 0);
 			ex_print("%5ld %3d is sleeping\n", philo->id);
 			sleep_until(philo, micro_ts() + philo->info->sleep_time);
 		}

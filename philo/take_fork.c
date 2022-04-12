@@ -6,50 +6,21 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:22 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 07:05:24 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 23:14:36 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	take_fork2(t_philo *philo)
+int		take_fork(t_fork *fork, int id)
 {
-	long	ts_release;
-	long	now;
-
-	pthread_mutex_lock(&philo->right->lock);
-	ts_release = philo->right->ts_release;
-	if (ts_release > micro_ts())
+	if (fork->ts_release == 0)
 	{
-		pthread_mutex_unlock(&philo->left->lock);
-		pthread_mutex_unlock(&philo->right->lock);
-		philo->state--;
-		sleep_until(philo, ts_release);
+		pthread_mutex_lock(&fork->lock);
+		fork->ts_release = 1;
+		pthread_mutex_unlock(&fork->lock);
+		ex_print("%5ld %3d has taken a fork\n", id);
+		return (1);
 	}
-	else
-	{
-		now = micro_ts();
-		philo->left->ts_release = now + philo->info->eat_time;
-		philo->right->ts_release = now + philo->info->eat_time;
-		pthread_mutex_unlock(&philo->left->lock);
-		pthread_mutex_unlock(&philo->right->lock);
-	}
-}
-
-void	take_fork(t_philo *philo)
-{
-	long	ts_release;
-
-	pthread_mutex_lock(&philo->left->lock);
-	ts_release = philo->left->ts_release;
-	if (ts_release > micro_ts())
-	{
-		pthread_mutex_unlock(&philo->left->lock);
-		philo->state--;
-		sleep_until(philo, ts_release);
-	}
-	else if (philo->info->maxphil > 1)
-		take_fork2(philo);
-	else
-		sleep_until(philo, philo->ts_dead);
+	return (0);
 }
