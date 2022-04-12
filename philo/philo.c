@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 07:05:10 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 07:16:34 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,9 @@ void	philosopher(t_philo *philo)
 			take_fork(philo);
 		else if (philo->state == eating)
 		{
-			printf("%1$5ld %2$3d has taken fork\n%1$5ld %2$3d has taken fork\n"
-				"%1$5ld %2$3d is eating\n", micro_ts() / 1000, philo->id);
+			printf("%1$5ld %2$3d has taken a fork\n"
+				"%1$5ld %2$3d has taken a fork\n" "%1$5ld %2$3d is eating\n",
+				micro_ts() / 1000, philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, micro_ts() + philo->info->eat_time);
 		}
