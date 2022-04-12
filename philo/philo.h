@@ -8,7 +8,6 @@ typedef pthread_mutex_t	t_mutex;
 typedef struct s_fork
 {
 	t_mutex		lock;
-	int			taken;
 	long		ts_release;
 }				t_fork;
 
@@ -20,7 +19,7 @@ typedef struct s_info {
 	long		eat_time;
 	long		sleep_time;
 	int			maxphil;
-	int			number_of_times_each_philosopher_must_eat;
+	int			eat_count;
 	volatile int	exit;
 }				t_info;
 
@@ -39,7 +38,6 @@ typedef struct s_philo
 	t_fork		*left;
 	t_fork		*right;
 	t_fork		*forks;
-	long		last_meal;
 	long		ts_dead;
 	int			state;
 	int			counter;
@@ -48,4 +46,5 @@ typedef struct s_philo
 }				t_philo;
 
 int		parse_int(char *str);
+int		arg_warn(int ac);
 #endif

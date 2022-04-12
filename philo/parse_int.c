@@ -1,5 +1,22 @@
 #include <limits.h>
+#include <stdio.h>
 
+int	arg_warn(int ac)
+{
+	if (ac < 2)
+		printf("missing maxphil\n");
+	if (ac < 3)
+		printf("missing time_to_die\n");
+	if (ac < 4)
+		printf("missing eat_time\n");
+	if (ac < 5)
+		printf("missing sleep_time\n");
+	if (ac > 6)
+		printf("eror: maximum 5 argument\n");
+	if (ac < 5 || ac > 6)
+		return (1);
+	return (0);
+}
 _Bool	is_num(char c)
 {
 	return (c >= '0' && c <= '9');

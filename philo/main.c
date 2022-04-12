@@ -57,11 +57,11 @@ int		check_dead(t_philo *philo)
 		pthread_mutex_unlock(&philo->info->exit_l);
 		return (0);
 	}
-	else if (micro_ts() > philo->ts_dead)
+	else if (philo->alive == 0)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
-		printf("%5ld %d died\n", micro_ts() / 1000, philo->id);
+		printf("%5ld %3d died\n", micro_ts() / 1000, philo->id);
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
@@ -86,32 +86,41 @@ int		test_and_set(t_mutex *lock, int *val)
 
 void	sleep_until(t_philo *philo, long ts)
 {
-	if (ts < philo->ts_dead)
-		usleep(ts - micro_ts());
+	long		now;
+
+	now = micro_ts();
+	if (ts < philo->ts_dead )
+	{
+		if (ts - now > 0)
+			usleep(ts - now);
+	}
 	else
 	{
-		usleep(philo->ts_dead - micro_ts());
+		if (philo->ts_dead - now > 0)
+			usleep(philo->ts_dead - now);
 		philo->alive = 0;
 	}
-
 }
 
 void	take_fork2(t_philo *philo)
 {
 	long	ts_release;
+	long	now;
 
 	pthread_mutex_lock(&philo->right->lock);
 	ts_release = philo->right->ts_release;
-	if (ts_release)
+	if (ts_release > micro_ts())
 	{
 		pthread_mutex_unlock(&philo->left->lock);
 		pthread_mutex_unlock(&philo->right->lock);
+		philo->state--;
 		sleep_until(philo, ts_release);
 	}
 	else
 	{
-		philo->left->ts_release = micro_ts() + philo->info->eat_time;
-		philo->right->ts_release = micro_ts() + philo->info->eat_time;
+		now = micro_ts();
+		philo->left->ts_release = now + philo->info->eat_time;
+		philo->right->ts_release = now + philo->info->eat_time;
 		pthread_mutex_unlock(&philo->left->lock);
 		pthread_mutex_unlock(&philo->right->lock);
 	}
@@ -123,15 +132,16 @@ void	take_fork(t_philo *philo)
 
 	pthread_mutex_lock(&philo->left->lock);
 	ts_release = philo->left->ts_release;
-	if (ts_release)
+	if (ts_release > micro_ts())
 	{
 		pthread_mutex_unlock(&philo->left->lock);
+		philo->state--;
 		sleep_until(philo, ts_release);
 	}
-	else
-	{
+	else if (philo->info->maxphil > 1)
 		take_fork2(philo);
-	}
+	else
+		sleep_until(philo, philo->ts_dead); 
 }
 
 long	long_min(long a, long b)
@@ -144,15 +154,14 @@ long	long_min(long a, long b)
 
 void	philosopher(t_philo *philo)
 {
-	while (philo->alive)
+	while (check_dead(philo))
 	{
 		if (philo->state == hungry)
 			take_fork(philo);
 		else if (philo->state == eating)
 		{
-			printf("%5ld %d has taken fork\n", micro_ts()/1000, philo->id);
-			printf("%5ld %d has taken fork\n", micro_ts()/1000, philo->id);
-			printf("%5ld %d is eating\n", micro_ts()/1000, philo->id);
+			printf("%1$5ld %2$3d has taken fork\n%1$5ld %2$3d has taken fork\n"
+					"%1$5ld %2$3d is eating\n", micro_ts() / 1000, philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, micro_ts() + philo->info->eat_time);
 		}
@@ -160,12 +169,14 @@ void	philosopher(t_philo *philo)
 		{
 			long_write(&philo->left->lock, &philo->left->ts_release, 0);
 			long_write(&philo->right->lock, &philo->right->ts_release, 0);
-			printf("%5ld %d is sleeping\n", micro_ts()/1000, philo->id);
+			if (++philo->counter == philo->info->eat_count)
+				break ;
+			printf("%5ld %3d is sleeping\n", micro_ts() / 1000, philo->id);
 			sleep_until(philo, micro_ts() + philo->info->sleep_time);
 		}
 		else if (philo->state == thinking)
-			printf("%5ld %d is thinking\n", micro_ts()/1000, philo->id);
-		philo->state = (philo->state + 1) % total_state;
+			printf("%5ld %3d is thinking\n", micro_ts() / 1000, philo->id);
+		philo->state = (philo->state + 1) % (total_state);
 	}
 }
 
@@ -195,7 +206,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		philos[i].id = i;
+		philos[i].id = i + 1;
 		philos[i].info = info;
 		if (i & 1)
 		{
@@ -208,9 +219,9 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 			philos[i].left = &forks[(i + 1) % info->maxphil];
 		}
 		philos[i].alive = 1;
-		philos[i].last_meal = 0;
 		philos[i].ts_dead = info->time_to_die;
 		philos[i].state = hungry;
+		philos[i].counter = 0;
 		pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]);
 		i++;
@@ -222,12 +233,12 @@ int		wait_philos(t_info *info, t_fork *forks)
 	t_philo		*philos;
 	int			i;
 
-	i = 0;
 	philos = malloc(sizeof(*philos) * info->maxphil);
 	if (!philos) {
 		return (1);
 	}
 	create_philos(info, philos, forks);
+	i = 0;
 	while (i < info->maxphil)
 	{
 		pthread_join(philos[i].thread, NULL);
@@ -242,20 +253,14 @@ int		main(int ac, char **av)
 {
 	static t_info	info;
 
-	if (ac < 2)
-		printf("missing maxphil\n");
-	if (ac < 3)
-		printf("missing time_to_die\n");
-	if (ac < 4)
-		printf("missing eat_time\n");
-	if (ac < 5)
-		printf("missing sleep_time\n");
-	if (ac < 5)
+	if (arg_warn(ac))
 		return (1);
 	info.maxphil = parse_int(av[1]);
 	info.time_to_die = parse_int(av[2]) * 1000;
 	info.eat_time = parse_int(av[3]) * 1000;
 	info.sleep_time = parse_int(av[4]) * 1000;
+	if (ac > 5)
+		info.eat_count = parse_int(av[5]);
 	info.start = micro_ts();
 	info.exit = 0;
 	return (wait_philos(&info, init_forks(&info)));
