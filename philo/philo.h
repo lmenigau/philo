@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 07:04:11 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 18:57:55 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,4 +63,5 @@ void	philosopher(t_philo *philo);
 void	take_fork(t_philo *philo);
 long	micro_ts(void);
 void	sleep_until(t_philo *philo, long ts);
+void	ex_print(char *fmt, int id);
 #endif

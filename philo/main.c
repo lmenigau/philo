@@ -6,14 +6,23 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 12:00:46 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 19:03:57 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <pthread.h>
 #include "philo.h"
-#include <stdio.h>
+
+void	ex_print(char *fmt, int id)
+{
+	static t_mutex	mut = PTHREAD_MUTEX_INITIALIZER;
+
+	pthread_mutex_lock(&mut);
+	printf(fmt, micro_ts() / 1000, id);
+	pthread_mutex_unlock(&mut);
+}
 
 t_fork	*init_forks(t_info *info)
 {
@@ -55,7 +64,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 		philos[i].alive = 1;
 		philos[i].ts_dead = info->time_to_die;
 		philos[i].state = hungry;
-		philos[i].counter = 0;
+		philos[i].counter = info->eat_count;
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))
 			info->maxphil = i;
@@ -95,6 +104,8 @@ int	main(int ac, char **av)
 	info.sleep_time = parse_int(av[4]) * 1000;
 	if (ac > 5)
 		info.eat_count = parse_int(av[5]);
+	else
+		info.eat_count = -1;
 	info.start = micro_ts();
 	info.exit = 0;
 	return (wait_philos(&info, init_forks(&info)));

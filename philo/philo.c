@@ -6,14 +6,14 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 07:16:34 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 18:59:33 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
-#include <pthread.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <pthread.h>
 #include "philo.h"
 
 long	micro_ts(void)
@@ -48,7 +48,7 @@ int	check_dead(t_philo *philo)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
-		printf("%5ld %3d died\n", micro_ts() / 1000, philo->id);
+		ex_print("%5ld %3d died\n", philo->id);
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
@@ -81,9 +81,9 @@ void	philosopher(t_philo *philo)
 			take_fork(philo);
 		else if (philo->state == eating)
 		{
-			printf("%1$5ld %2$3d has taken a fork\n"
+			ex_print("%1$5ld %2$3d has taken a fork\n"
 				"%1$5ld %2$3d has taken a fork\n" "%1$5ld %2$3d is eating\n",
-				micro_ts() / 1000, philo->id);
+				philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, micro_ts() + philo->info->eat_time);
 		}
@@ -91,13 +91,13 @@ void	philosopher(t_philo *philo)
 		{
 			long_write(&philo->left->lock, &philo->left->ts_release, 0);
 			long_write(&philo->right->lock, &philo->right->ts_release, 0);
-			if (++philo->counter == philo->info->eat_count)
+			if (--philo->counter == 0)
 				break ;
-			printf("%5ld %3d is sleeping\n", micro_ts() / 1000, philo->id);
+			ex_print("%5ld %3d is sleeping\n", philo->id);
 			sleep_until(philo, micro_ts() + philo->info->sleep_time);
 		}
 		else if (philo->state == thinking)
-			printf("%5ld %3d is thinking\n", micro_ts() / 1000, philo->id);
+			ex_print("%5ld %3d is thinking\n", philo->id);
 		philo->state = (philo->state + 1) % (total_state);
 	}
 }
