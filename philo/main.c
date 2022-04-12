@@ -6,13 +6,14 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 06:57:41 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 12:00:46 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <pthread.h>
 #include "philo.h"
+#include <stdio.h>
 
 t_fork	*init_forks(t_info *info)
 {
@@ -40,8 +41,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		philos[i].id = i + 1;
-		philos[i].info = info;
+		philos[i] = (t_philo){.id = i + 1, .info = info};
 		if (i & 1)
 		{
 			philos[i].left = &forks[i];
@@ -56,8 +56,9 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 		philos[i].ts_dead = info->time_to_die;
 		philos[i].state = hungry;
 		philos[i].counter = 0;
-		pthread_create(&philos[i].thread, NULL,
-			(void *)philosopher, &philos[i]);
+		if (pthread_create(&philos[i].thread, NULL,
+				(void *)philosopher, &philos[i]))
+			info->maxphil = i;
 		i++;
 	}
 }
