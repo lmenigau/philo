@@ -20,7 +20,7 @@ typedef struct s_info {
 	long		sleep_time;
 	int			maxphil;
 	int			eat_count;
-	volatile int	exit;
+	int			exit;
 }				t_info;
 
 enum e_state {

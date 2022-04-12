@@ -17,6 +17,7 @@ int	arg_warn(int ac)
 		return (1);
 	return (0);
 }
+
 _Bool	is_num(char c)
 {
 	return (c >= '0' && c <= '9');
