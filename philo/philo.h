@@ -47,4 +47,8 @@ typedef struct s_philo
 
 int		parse_int(char *str);
 int		arg_warn(int ac);
+void	philosopher(t_philo *philo);
+void	take_fork(t_philo *philo);
+long	micro_ts(void);
+void	sleep_until(t_philo *philo, long ts);
 #endif

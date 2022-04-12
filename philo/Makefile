@@ -1,6 +1,6 @@
-SRC		=  main.c parse_int.c
+SRC		=  main.c parse_int.c philo.c take_fork.c
 OBJ		= $(SRC:.c=.o)
-CFLAGS	= -O3 -g -Wall -Wextra 
+CFLAGS	= -Wall -Wextra -Werror
 NAME	= philo
 CC		= clang
 ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'
