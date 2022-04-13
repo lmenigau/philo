@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:22 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 01:01:17 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/14 01:26:09 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 
-long		test_fork(t_fork *fork)
+long	test_fork(t_fork *fork)
 {
 	long	ts_release;
 
@@ -30,19 +30,18 @@ long		test_fork(t_fork *fork)
 	return (0);
 }
 
-int		take_fork(t_philo *philo)
+int	take_fork(t_philo *philo)
 {
 	if (!philo->f_left && test_fork(philo->left))
 	{
 		philo->f_left = 1;
-		ex_print("%5ld %3d has taken a fork\n", philo->id);
+		ex_print("%5ld %3d has taken first a fork\n", philo->id);
 	}
-	else if (!philo->f_right && test_fork(philo->right))
+	if (philo->f_left && !philo->f_right && test_fork(philo->right))
 	{
 		philo->f_right = 1;
-		ex_print("%5ld %3d has taken a fork\n", philo->id);
-	}
-	else if (philo->f_right && philo->f_left)
+		ex_print("%5ld %3d has taken second a fork\n", philo->id);
 		return (1);
+	}
 	return (0);
 }
