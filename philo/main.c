@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/13 02:39:15 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/12 19:03:57 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ t_fork	*init_forks(t_info *info)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		forks[i].taken = 0;
+		forks[i].ts_release = 0;
 		if (pthread_mutex_init(&forks[i].lock, NULL))
 			return (NULL);
 		i++;
@@ -63,7 +63,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 		}
 		philos[i].alive = 1;
 		philos[i].ts_dead = info->time_to_die;
-		philos[i].state = lock1;
+		philos[i].state = hungry;
 		philos[i].counter = info->eat_count;
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))
