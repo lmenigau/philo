@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 23:41:15 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/13 02:49:47 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int	check_dead(t_philo *philo)
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
-	usleep(1000);
+	usleep(500);
 	return (1);
 }
 
@@ -78,9 +78,9 @@ void	philosopher(t_philo *philo)
 {
 	while (check_dead(philo))
 	{
-		if (philo->state == lock1 && !take_fork(philo->left, philo->id))
+		if (philo->state == lock1 && !take_fork(philo->left, philo))
 				philo->state--;
-		if (philo->state == lock2 && !take_fork(philo->right, philo->id))
+		else if (philo->state == lock2 && !take_fork(philo->right, philo))
 				philo->state--;
 		else if (philo->state == eating)
 		{
@@ -90,10 +90,10 @@ void	philosopher(t_philo *philo)
 		}
 		else if (philo->state == sleeping)
 		{
+			long_write(&philo->left->lock, &philo->left->taken, 0);
+			long_write(&philo->right->lock, &philo->right->taken, 0);
 			if (--philo->counter == 0)
 				break ;
-			long_write(&philo->left->lock, &philo->left->ts_release, 0);
-			long_write(&philo->right->lock, &philo->right->ts_release, 0);
 			ex_print("%5ld %3d is sleeping\n", philo->id);
 			sleep_until(philo, micro_ts() + philo->info->sleep_time);
 		}

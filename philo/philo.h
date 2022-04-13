@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 23:25:40 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/13 02:37:11 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ typedef pthread_mutex_t	t_mutex;
 typedef struct s_fork
 {
 	t_mutex		lock;
-	long		ts_release;
+	long		taken;
 }				t_fork;
 
 typedef struct s_info {
@@ -36,7 +36,6 @@ typedef struct s_info {
 }				t_info;
 
 enum e_state {
-	hungry,
 	lock1,
 	lock2,
 	eating,
@@ -62,7 +61,8 @@ typedef struct s_philo
 int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
-int		take_fork(t_fork *locki, int id);
+int		take_fork(t_fork *lock, t_philo *philo);
+int		take_fork2(t_philo *philo);
 long	micro_ts(void);
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, int id);
