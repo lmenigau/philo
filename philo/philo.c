@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 18:59:33 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/14 01:05:14 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	check_dead(t_philo *philo)
 		pthread_mutex_unlock(&philo->info->exit_l);
 		return (0);
 	}
-	else if (philo->alive == 0)
+	else if (micro_ts() > philo->ts_dead)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
@@ -77,13 +77,11 @@ void	philosopher(t_philo *philo)
 {
 	while (check_dead(philo))
 	{
-		if (philo->state == hungry)
-			take_fork(philo);
+		if (philo->state == hungry && !take_fork(philo))
+			philo->state = thinking;
 		else if (philo->state == eating)
 		{
-			ex_print("%1$5ld %2$3d has taken a fork\n"
-				"%1$5ld %2$3d has taken a fork\n" "%1$5ld %2$3d is eating\n",
-				philo->id);
+			ex_print("%5ld %3d is eating\n", philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, micro_ts() + philo->info->eat_time);
 		}
@@ -91,6 +89,8 @@ void	philosopher(t_philo *philo)
 		{
 			long_write(&philo->left->lock, &philo->left->ts_release, 0);
 			long_write(&philo->right->lock, &philo->right->ts_release, 0);
+			philo->f_left = 0;
+			philo->f_right = 0;
 			if (--philo->counter == 0)
 				break ;
 			ex_print("%5ld %3d is sleeping\n", philo->id);

@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 19:03:57 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/13 22:46:27 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,10 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		philos[i] = (t_philo){.id = i + 1, .info = info};
+		philos[i] = (t_philo){.id = i + 1, .info = info, .alive = 1};
+		philos[i].ts_dead = info->time_to_die;
+		philos[i].state = hungry;
+		philos[i].counter = info->eat_count;
 		if (i & 1)
 		{
 			philos[i].left = &forks[i];
@@ -61,10 +64,6 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 			philos[i].right = &forks[i];
 			philos[i].left = &forks[(i + 1) % info->maxphil];
 		}
-		philos[i].alive = 1;
-		philos[i].ts_dead = info->time_to_die;
-		philos[i].state = hungry;
-		philos[i].counter = info->eat_count;
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))
 			info->maxphil = i;

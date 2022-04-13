@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/12 18:57:55 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/13 23:50:25 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ typedef struct s_philo
 	t_fork		*left;
 	t_fork		*right;
 	t_fork		*forks;
+	int			f_left;
+	int			f_right;
 	long		ts_dead;
 	int			state;
 	int			counter;
@@ -60,7 +62,7 @@ typedef struct s_philo
 int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
-void	take_fork(t_philo *philo);
+int		take_fork(t_philo *philo);
 long	micro_ts(void);
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, int id);
