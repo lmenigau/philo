@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:22 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 05:54:15 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/14 06:05:31 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	take_fork(t_philo *philo)
 	{
 		if (test_fork(philo->left, philo, &ts))
 		{
-			ex_print("%5ld %3d has taken first a fork\n", philo->id);
+			ex_print("%5ld %3d has taken a fork\n", philo->id);
 			philo->f_left = 1;
 		}
 		else
@@ -46,7 +46,7 @@ int	take_fork(t_philo *philo)
 		if (test_fork(philo->right, philo, &ts))
 		{
 			philo->f_right = 1;
-			ex_print("%5ld %3d has taken second a fork\n", philo->id);
+			ex_print("%5ld %3d has taken a fork\n", philo->id);
 			return (1);
 		}
 		else
