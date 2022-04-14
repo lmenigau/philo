@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 05:43:56 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/14 06:58:35 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,11 @@ int	main(int ac, char **av)
 	info.eat_time = parse_int(av[3]) * 1000;
 	info.sleep_time = parse_int(av[4]) * 1000;
 	if (ac > 5)
+	{
 		info.eat_count = parse_int(av[5]);
+		if (info.eat_count < 1)
+			return (0);
+	}
 	else
 		info.eat_count = -1;
 	info.start = micro_ts();
