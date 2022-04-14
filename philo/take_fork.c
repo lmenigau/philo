@@ -6,23 +6,20 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:22 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 01:26:09 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/04/14 05:54:15 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include "philo.h"
 
-#include <stdio.h>
-
-long	test_fork(t_fork *fork)
+long	test_fork(t_fork *fork, t_philo *philo, long *ts)
 {
-	long	ts_release;
-
 	pthread_mutex_lock(&fork->lock);
-	ts_release = fork->ts_release;
+	*ts = fork->ts_release;
 	if (fork->ts_release == 0)
 	{
-		fork->ts_release = 1;
+		fork->ts_release = micro_ts() + philo->info->eat_time;
 		pthread_mutex_unlock(&fork->lock);
 		return (1);
 	}
@@ -32,16 +29,28 @@ long	test_fork(t_fork *fork)
 
 int	take_fork(t_philo *philo)
 {
-	if (!philo->f_left && test_fork(philo->left))
+	long		ts;
+
+	if (!philo->f_left)
 	{
-		philo->f_left = 1;
-		ex_print("%5ld %3d has taken first a fork\n", philo->id);
+		if (test_fork(philo->left, philo, &ts))
+		{
+			ex_print("%5ld %3d has taken first a fork\n", philo->id);
+			philo->f_left = 1;
+		}
+		else
+			sleep_until(philo, ts);
 	}
-	if (philo->f_left && !philo->f_right && test_fork(philo->right))
+	if (philo->f_left && !philo->f_right)
 	{
-		philo->f_right = 1;
-		ex_print("%5ld %3d has taken second a fork\n", philo->id);
-		return (1);
+		if (test_fork(philo->right, philo, &ts))
+		{
+			philo->f_right = 1;
+			ex_print("%5ld %3d has taken second a fork\n", philo->id);
+			return (1);
+		}
+		else
+			sleep_until(philo, ts);
 	}
 	return (0);
 }
