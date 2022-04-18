@@ -37,8 +37,7 @@ typedef struct s_info {
 }				t_info;
 
 enum e_state {
-	fork1,
-	fork2,
+	lock_Fork,
 	eating,
 	sleeping,
 	thinking,

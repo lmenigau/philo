@@ -83,21 +83,23 @@ void	sleep_until(t_philo *philo, long dur)
 void	philosopher(t_philo *philo)
 {
 	philo->ts_dead = micro_ts() + philo->info->time_to_die;
-	//if (philo->id & 1)
-	//	usleep(5000);
+	if (philo->id & 1)
+		sleep_until(philo, 5000);
 	while (check_dead(philo))
 	{
-		if (philo->state == fork1)
-			take_fork(philo, &philo->left->lock);
-		else if (philo->state == fork2)
-			take_fork(philo, &philo->right->lock);
+		if (philo->state == lock_Fork)
+		{
+			pthread_mutex_lock(&philo->left->lock);
+			pthread_mutex_lock(&philo->right->lock);
+		}
 		else if (philo->state == eating)
 		{
+			ex_print("%5ld %3d has taken a fork\n", philo->id);
+			ex_print("%5ld %3d has taken a fork\n", philo->id);
 			ex_print("%5ld %3d is eating\n", philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, philo->info->eat_time);
 			pthread_mutex_unlock(&philo->left->lock);
-			usleep(500);
 			pthread_mutex_unlock(&philo->right->lock);
 		}
 		else if (philo->state == sleeping)
