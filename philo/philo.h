@@ -25,6 +25,7 @@ typedef struct s_fork
 
 typedef struct s_info {
 	t_mutex		exit_l;
+	t_mutex		waiter;
 	t_fork		*forks;
 	long		start;
 	long		time_to_die;
@@ -36,8 +37,8 @@ typedef struct s_info {
 }				t_info;
 
 enum e_state {
-	lleft,
-	lright,
+	fork1,
+	fork2,
 	eating,
 	sleeping,
 	thinking,

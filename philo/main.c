@@ -52,7 +52,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	{
 		philos[i] = (t_philo){.id = i + 1, .info = info, .alive = 1};
 		philos[i].ts_dead = info->time_to_die;
-		philos[i].state = lleft;
+		philos[i].state = 0;
 		philos[i].counter = info->eat_count;
 		if (i + 1 == info->maxphil)
 		{
@@ -110,6 +110,8 @@ int	main(int ac, char **av)
 	else
 		info.eat_count = -1;
 	info.start = micro_ts();
+	pthread_mutex_init(&info.exit_l, NULL);
+	pthread_mutex_init(&info.waiter, NULL);
 	info.exit = 0;
 	return (wait_philos(&info, init_forks(&info)));
 }

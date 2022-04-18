@@ -42,6 +42,11 @@ int	check_dead(t_philo *philo)
 	if (philo->info->exit)
 	{
 		pthread_mutex_unlock(&philo->info->exit_l);
+		if (philo->state == eating)
+		{
+			pthread_mutex_unlock(&philo->left->lock);
+			pthread_mutex_unlock(&philo->right->lock);
+		}
 		return (0);
 	}
 	else if (micro_ts() > philo->ts_dead)
@@ -66,7 +71,7 @@ void	sleep_until(t_philo *philo, long dur)
 
 	now = micro_ts();
 	if (now + dur < philo->ts_dead)
-			usleep(dur);
+		usleep(dur);
 	else
 	{
 		if (philo->ts_dead - now > 0)
@@ -77,17 +82,16 @@ void	sleep_until(t_philo *philo, long dur)
 
 void	philosopher(t_philo *philo)
 {
-
 	philo->ts_dead = micro_ts() + philo->info->time_to_die;
+	//if (philo->id & 1)
+	//	usleep(5000);
 	while (check_dead(philo))
 	{
-		long ts = micro_ts();
-		if (philo->state == lleft)
+		if (philo->state == fork1)
 			take_fork(philo, &philo->left->lock);
-		else if (philo->state == lright)
+		else if (philo->state == fork2)
 			take_fork(philo, &philo->right->lock);
-		ts = micro_ts() - ts;
-		if (philo->state == eating)
+		else if (philo->state == eating)
 		{
 			ex_print("%5ld %3d is eating\n", philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
@@ -106,8 +110,6 @@ void	philosopher(t_philo *philo)
 		else if (philo->state == thinking)
 		{
 			ex_print("%5ld %3d is thinking\n", philo->id);
-			//if (ts < philo->info->eat_time * 2)
-			//	sleep_until(philo, 5000);
 		}
 		philo->state = (philo->state + 1) % (total_state);
 	}
