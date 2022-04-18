@@ -64,7 +64,7 @@ int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
 void	take_fork(t_philo *philo, t_mutex *lok);
-long	micro_ts(void);
+long	micro_ts(long start);
 void	sleep_until(t_philo *philo, long ts);
-void	ex_print(char *fmt, int id);
+void	ex_print(char *fmt, long start, int id);
 #endif

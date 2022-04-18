@@ -15,12 +15,14 @@
 #include <pthread.h>
 #include "philo.h"
 
-void	ex_print(char *fmt, int id)
+void	ex_print(char *fmt, long start, int id)
 {
 	static t_mutex	mut = PTHREAD_MUTEX_INITIALIZER;
+	long 			now;
 
+	now = micro_ts(start) / 1000;
 	pthread_mutex_lock(&mut);
-	printf(fmt, micro_ts() / 1000, id);
+	printf(fmt, now, id);
 	pthread_mutex_unlock(&mut);
 }
 
@@ -109,7 +111,7 @@ int	main(int ac, char **av)
 	}
 	else
 		info.eat_count = -1;
-	info.start = micro_ts();
+	info.start = micro_ts(0);
 	pthread_mutex_init(&info.exit_l, NULL);
 	pthread_mutex_init(&info.waiter, NULL);
 	info.exit = 0;

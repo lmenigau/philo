@@ -19,7 +19,7 @@ long	test_fork(t_fork *fork, t_philo *philo, long *ts)
 	*ts = fork->ts_release;
 	if (fork->ts_release == 0)
 	{
-		fork->ts_release = micro_ts() + philo->info->eat_time;
+		fork->ts_release = micro_ts(philo->info->start) + philo->info->eat_time;
 		pthread_mutex_unlock(&fork->lock);
 		return (1);
 	}
@@ -35,7 +35,7 @@ int	take_fork_old(t_philo *philo)
 	{
 		if (test_fork(philo->left, philo, &ts))
 		{
-			ex_print("%5ld %3d has taken a fork\n", philo->id);
+			ex_print("%5ld %3d has taken a fork\n", philo->info->start, philo->id);
 			philo->f_left = 1;
 		}
 		else
@@ -46,7 +46,7 @@ int	take_fork_old(t_philo *philo)
 		if (test_fork(philo->right, philo, &ts))
 		{
 			philo->f_right = 1;
-			ex_print("%5ld %3d has taken a fork\n", philo->id);
+			ex_print("%5ld %3d has taken a fork\n", philo->info->start, philo->id);
 			return (1);
 		}
 		else
@@ -58,6 +58,6 @@ int	take_fork_old(t_philo *philo)
 void	take_fork(t_philo *philo, t_mutex *lock)
 {
 	pthread_mutex_lock(lock);
-	ex_print("%5ld %3d has taken a fork\n", philo->id);
+	ex_print("%5ld %3d has taken a fork\n", philo->info->start, philo->id);
 }
 

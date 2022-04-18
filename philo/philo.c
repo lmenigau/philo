@@ -16,16 +16,13 @@
 #include <pthread.h>
 #include "philo.h"
 
-long	micro_ts(void)
+long	micro_ts(long start)
 {
-	static long		start;
 	long			ts;
 	struct timeval	tm;
 
 	gettimeofday(&tm, NULL);
 	ts = tm.tv_sec * 1000000 + tm.tv_usec;
-	if (!start)
-		start = ts;
 	return (ts - start);
 }
 
@@ -36,7 +33,7 @@ void	long_write(t_mutex *lock, long *ptr, long val)
 	pthread_mutex_unlock(lock);
 }
 
-int	check_dead(t_philo *philo)
+int	check_dead(t_philo *philo, long now)
 {
 	pthread_mutex_lock(&philo->info->exit_l);
 	if (philo->info->exit)
@@ -49,11 +46,11 @@ int	check_dead(t_philo *philo)
 		}
 		return (0);
 	}
-	else if (micro_ts() > philo->ts_dead)
+	else if (now > philo->ts_dead)
 	{
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
-		ex_print("%5ld %3d died\n", philo->id);
+		ex_print("%5ld %3d died\n", philo->info->start, philo->id);
 		if (philo->state == eating)
 		{
 			pthread_mutex_unlock(&philo->left->lock);
@@ -62,6 +59,7 @@ int	check_dead(t_philo *philo)
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
+	usleep(1);
 	return (1);
 }
 
@@ -69,7 +67,7 @@ void	sleep_until(t_philo *philo, long dur)
 {
 	long		now;
 
-	now = micro_ts();
+	now = micro_ts(philo->info->start);
 	if (now + dur < philo->ts_dead)
 		usleep(dur);
 	else
@@ -82,10 +80,10 @@ void	sleep_until(t_philo *philo, long dur)
 
 void	philosopher(t_philo *philo)
 {
-	philo->ts_dead = micro_ts() + philo->info->time_to_die;
+	philo->ts_dead = micro_ts(philo->info->start) + philo->info->time_to_die;
 	if (philo->id & 1)
 		sleep_until(philo, 5000);
-	while (check_dead(philo))
+	while (check_dead(philo, micro_ts(philo->info->start)))
 	{
 		if (philo->state == lock_Fork)
 		{
@@ -95,10 +93,10 @@ void	philosopher(t_philo *philo)
 		}
 		else if (philo->state == eating)
 		{
-			ex_print("%5ld %3d has taken a fork\n", philo->id);
-			ex_print("%5ld %3d has taken a fork\n", philo->id);
-			ex_print("%5ld %3d is eating\n", philo->id);
-			philo->ts_dead = micro_ts() + philo->info->time_to_die;
+			ex_print("%1$5ld %2$3d has taken a fork\n"
+					"%1$5ld %2$3d has taken a fork\n"
+					"%1$5ld %2$3d is eating\n", philo->info->start, philo->id);
+			philo->ts_dead = micro_ts(philo->info->start) + philo->info->time_to_die;
 			sleep_until(philo, philo->info->eat_time);
 			pthread_mutex_unlock(&philo->left->lock);
 			usleep(1);
@@ -109,12 +107,13 @@ void	philosopher(t_philo *philo)
 		{
 			if (--philo->counter == 0)
 				break ;
-			ex_print("%5ld %3d is sleeping\n", philo->id);
+			ex_print("%5ld %3d is sleeping\n", philo->info->start, philo->id);
 			sleep_until(philo, philo->info->sleep_time);
 		}
 		else if (philo->state == thinking)
 		{
-			ex_print("%5ld %3d is thinking\n", philo->id);
+			ex_print("%5ld %3d is thinking\n", philo->info->start, philo->id);
+			sleep_until(philo, (philo->ts_dead - micro_ts(philo->info->start)));
 		}
 		philo->state = (philo->state + 1) % (total_state);
 	}
