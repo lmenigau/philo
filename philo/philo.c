@@ -89,6 +89,7 @@ void	philosopher(t_philo *philo)
 	{
 		if (philo->state == lock_Fork)
 		{
+			usleep(1);
 			pthread_mutex_lock(&philo->left->lock);
 			pthread_mutex_lock(&philo->right->lock);
 		}
@@ -100,7 +101,9 @@ void	philosopher(t_philo *philo)
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
 			sleep_until(philo, philo->info->eat_time);
 			pthread_mutex_unlock(&philo->left->lock);
+			usleep(1);
 			pthread_mutex_unlock(&philo->right->lock);
+			usleep(1);
 		}
 		else if (philo->state == sleeping)
 		{
