@@ -36,7 +36,8 @@ typedef struct s_info {
 }				t_info;
 
 enum e_state {
-	hungry,
+	lleft,
+	lright,
 	eating,
 	sleeping,
 	thinking,
@@ -62,7 +63,7 @@ typedef struct s_philo
 int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
-int		take_fork(t_philo *philo);
+void	take_fork(t_philo *philo, t_mutex *lok);
 long	micro_ts(void);
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, int id);

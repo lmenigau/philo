@@ -27,7 +27,7 @@ long	test_fork(t_fork *fork, t_philo *philo, long *ts)
 	return (0);
 }
 
-int	take_fork(t_philo *philo)
+int	take_fork_old(t_philo *philo)
 {
 	long		ts;
 
@@ -54,3 +54,10 @@ int	take_fork(t_philo *philo)
 	}
 	return (0);
 }
+
+void	take_fork(t_philo *philo, t_mutex *lock)
+{
+	pthread_mutex_lock(lock);
+	ex_print("%5ld %3d has taken a fork\n", philo->id);
+}
+

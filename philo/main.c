@@ -52,17 +52,17 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	{
 		philos[i] = (t_philo){.id = i + 1, .info = info, .alive = 1};
 		philos[i].ts_dead = info->time_to_die;
-		philos[i].state = hungry;
+		philos[i].state = lleft;
 		philos[i].counter = info->eat_count;
-		if (i & 1)
+		if (i + 1 == info->maxphil)
 		{
-			philos[i].left = &forks[i];
-			philos[i].right = &forks[(i + 1) % info->maxphil];
+			philos[i].left = &forks[(i + 1) % info->maxphil];
+			philos[i].right = &forks[i];
 		}
 		else
 		{
-			philos[i].right = &forks[i];
-			philos[i].left = &forks[(i + 1) % info->maxphil];
+			philos[i].left = &forks[i];
+			philos[i].right = &forks[(i + 1) % info->maxphil];
 		}
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))

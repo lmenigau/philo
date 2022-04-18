@@ -49,22 +49,24 @@ int	check_dead(t_philo *philo)
 		philo->info->exit = 1;
 		pthread_mutex_unlock(&philo->info->exit_l);
 		ex_print("%5ld %3d died\n", philo->id);
+		if (philo->state == eating)
+		{
+			pthread_mutex_unlock(&philo->left->lock);
+			pthread_mutex_unlock(&philo->right->lock);
+		}
 		return (0);
 	}
 	pthread_mutex_unlock(&philo->info->exit_l);
 	return (1);
 }
 
-void	sleep_until(t_philo *philo, long ts)
+void	sleep_until(t_philo *philo, long dur)
 {
 	long		now;
 
 	now = micro_ts();
-	if (ts < philo->ts_dead)
-	{
-		if (ts - now > 0)
-			usleep(ts - now);
-	}
+	if (now + dur < philo->ts_dead)
+			usleep(dur);
 	else
 	{
 		if (philo->ts_dead - now > 0)
@@ -75,29 +77,38 @@ void	sleep_until(t_philo *philo, long ts)
 
 void	philosopher(t_philo *philo)
 {
+
+	philo->ts_dead = micro_ts() + philo->info->time_to_die;
 	while (check_dead(philo))
 	{
-		if (philo->state == hungry && !take_fork(philo))
-			philo->state = thinking;
-		else if (philo->state == eating)
+		long ts = micro_ts();
+		if (philo->state == lleft)
+			take_fork(philo, &philo->left->lock);
+		else if (philo->state == lright)
+			take_fork(philo, &philo->right->lock);
+		ts = micro_ts() - ts;
+		if (philo->state == eating)
 		{
 			ex_print("%5ld %3d is eating\n", philo->id);
 			philo->ts_dead = micro_ts() + philo->info->time_to_die;
-			sleep_until(philo, micro_ts() + philo->info->eat_time);
+			sleep_until(philo, philo->info->eat_time);
+			pthread_mutex_unlock(&philo->left->lock);
+			usleep(500);
+			pthread_mutex_unlock(&philo->right->lock);
 		}
 		else if (philo->state == sleeping)
 		{
-			long_write(&philo->left->lock, &philo->left->ts_release, 0);
-			long_write(&philo->right->lock, &philo->right->ts_release, 0);
-			philo->f_left = 0;
-			philo->f_right = 0;
 			if (--philo->counter == 0)
 				break ;
 			ex_print("%5ld %3d is sleeping\n", philo->id);
-			sleep_until(philo, micro_ts() + philo->info->sleep_time);
+			sleep_until(philo, philo->info->sleep_time);
 		}
 		else if (philo->state == thinking)
+		{
 			ex_print("%5ld %3d is thinking\n", philo->id);
+			//if (ts < philo->info->eat_time * 2)
+			//	sleep_until(philo, 5000);
+		}
 		philo->state = (philo->state + 1) % (total_state);
 	}
 }
