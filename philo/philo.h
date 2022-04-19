@@ -54,6 +54,7 @@ typedef struct s_philo
 	int			f_left;
 	int			f_right;
 	long		ts_dead;
+	long		last_meal;
 	int			state;
 	int			counter;
 	int			id;

@@ -1,6 +1,6 @@
-SRC		=  main.c parse_int.c philo.c take_fork.c
+SRC		=  main.c parse_int.c philo.c
 OBJ		= $(SRC:.c=.o)
-CFLAGS	= -Wall -Wextra -Werror -pthread  -fsanitize=thread
+CFLAGS	= -Wall -Wextra -Werror -pthread
 NAME	= philo
 CC		= clang
 ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'

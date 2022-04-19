@@ -18,7 +18,7 @@
 void	ex_print(char *fmt, long start, int id)
 {
 	static t_mutex	mut = PTHREAD_MUTEX_INITIALIZER;
-	long 			now;
+	long			now;
 
 	now = micro_ts(start) / 1000;
 	pthread_mutex_lock(&mut);
