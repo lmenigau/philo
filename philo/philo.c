@@ -16,14 +16,12 @@
 #include <pthread.h>
 #include "philo.h"
 
-long	micro_ts(long start)
+long	micro_ts(void)
 {
-	long			ts;
 	struct timeval	tm;
 
 	gettimeofday(&tm, NULL);
-	ts = tm.tv_sec * 1000000 + tm.tv_usec;
-	return (ts - start);
+	return (tm.tv_sec * 1000000 + tm.tv_usec);
 }
 
 void	long_write(t_mutex *lock, long *ptr, long val)
@@ -55,12 +53,11 @@ int	check_dead(t_philo *p, long now)
 	{
 		p->info->exit = 1;
 		pthread_mutex_unlock(&p->info->exit_l);
-		ex_print("%5ld %3d died\n", p->info->start, p->id);
+		ex_print("%5ld %3d died\n", p->info->start, p->id + 1);
 		unlock_forks(p);
 		return (0);
 	}
 	pthread_mutex_unlock(&p->info->exit_l);
-	usleep(1);
 	return (1);
 }
 
@@ -68,7 +65,7 @@ void	micro_sleep(t_philo *p, long dur)
 {
 	long		now;
 
-	now = micro_ts(p->info->start);
+	now = micro_ts();
 	if (now + dur < p->ts_dead)
 		usleep(dur);
 	else
@@ -85,35 +82,33 @@ void	eat(t_philo *p)
 		"%1$5ld %2$3d has taken a fork\n"
 		"%1$5ld %2$3d has taken a fork\n"
 		"%1$5ld %2$3d is eating\n",
-		p->info->start, p->id);
-	p->last_meal = micro_ts(p->info->start);
+		p->info->start, p->id + 1);
+	p->last_meal = micro_ts();
 	p->ts_dead = p->last_meal + p->info->time_to_die;
 	micro_sleep(p, p->info->eat_time);
 	pthread_mutex_unlock(&p->left->lock);
-	usleep(1);
 	pthread_mutex_unlock(&p->right->lock);
-	usleep(1);
 }
 
 void	think(t_philo *p)
 {
 	long	ttl;
 
-	ex_print("%5ld %3d is thinking\n", p->info->start, p->id);
-	ttl = p->ts_dead - micro_ts(p->info->start);
+	ex_print("%5ld %3d is thinking\n", p->info->start, p->id + 1);
+	ttl = p->ts_dead - micro_ts();
+	ex_print("%ld, %d\n", p->ts_dead, p->id + 1);
 	micro_sleep(p, ttl / 2);
 }
 
 void	philosopher(t_philo *p)
 {
-	p->ts_dead = micro_ts(p->info->start) + p->info->time_to_die;
+	p->ts_dead = micro_ts() + p->info->time_to_die;
 	if (p->id & 1)
-		micro_sleep(p, 5000);
-	while (check_dead(p, micro_ts(p->info->start)))
+		micro_sleep(p, p->info->eat_time);
+	while (check_dead(p, micro_ts()))
 	{
 		if (p->state == lock_Fork)
 		{
-			usleep(1);
 			pthread_mutex_lock(&p->left->lock);
 			pthread_mutex_lock(&p->right->lock);
 		}
@@ -123,7 +118,7 @@ void	philosopher(t_philo *p)
 		{
 			if (--p->counter == 0)
 				break ;
-			ex_print("%5ld %3d is sleeping\n", p->info->start, p->id);
+			ex_print("%5ld %3d is sleeping\n", p->info->start, p->id + 1);
 			micro_sleep(p, p->info->sleep_time);
 		}
 		else if (p->state == thinking)

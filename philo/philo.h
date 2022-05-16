@@ -53,6 +53,7 @@ typedef struct s_philo
 	t_fork		*forks;
 	int			f_left;
 	int			f_right;
+	long		lock_time;
 	long		ts_dead;
 	long		last_meal;
 	int			state;
@@ -65,7 +66,7 @@ int		parse_int(char *str);
 int		arg_warn(int ac);
 void	philosopher(t_philo *philo);
 void	take_fork(t_philo *philo, t_mutex *lok);
-long	micro_ts(long start);
+long	micro_ts();
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, long start, int id);
 #endif

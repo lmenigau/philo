@@ -20,7 +20,7 @@ void	ex_print(char *fmt, long start, int id)
 	static t_mutex	mut = PTHREAD_MUTEX_INITIALIZER;
 	long			now;
 
-	now = micro_ts(start) / 1000;
+	now = (micro_ts() - start) / 1000;
 	pthread_mutex_lock(&mut);
 	printf(fmt, now, id);
 	pthread_mutex_unlock(&mut);
@@ -52,8 +52,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	i = 0;
 	while (i < info->maxphil)
 	{
-		philos[i] = (t_philo){.id = i + 1, .info = info, .alive = 1};
-		philos[i].ts_dead = info->time_to_die;
+		philos[i] = (t_philo){.id = i, .info = info, .alive = 1};
 		philos[i].state = 0;
 		philos[i].counter = info->eat_count;
 		if (i + 1 == info->maxphil)
