@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/18 05:26:12 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/18 06:44:57 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,43 +22,6 @@ long	micro_ts(void)
 
 	gettimeofday(&tm, NULL);
 	return (tm.tv_sec * 1000000 + tm.tv_usec);
-}
-
-void	long_write(t_mutex *lock, long *ptr, long val)
-{
-	pthread_mutex_lock(lock);
-	*ptr = val;
-	pthread_mutex_unlock(lock);
-}
-
-void	unlock_forks(t_philo *p)
-{
-	if (p->state == eating)
-	{
-		pthread_mutex_unlock(&p->left->lock);
-		pthread_mutex_unlock(&p->right->lock);
-	}
-}
-
-int	check_dead(t_philo *p, long now)
-{
-	pthread_mutex_lock(&p->info->exit_l);
-	if (p->info->exit)
-	{
-		pthread_mutex_unlock(&p->info->exit_l);
-		unlock_forks(p);
-		return (0);
-	}
-	else if (now > p->ts_dead)
-	{
-		p->info->exit = 1;
-		pthread_mutex_unlock(&p->info->exit_l);
-		ex_print("%5ld %3d died\n", p->info->start, p->id + 1);
-		unlock_forks(p);
-		return (0);
-	}
-	pthread_mutex_unlock(&p->info->exit_l);
-	return (1);
 }
 
 void	micro_sleep(t_philo *p, long dur)
@@ -96,7 +59,6 @@ void	think(t_philo *p)
 
 	ex_print("%5ld %3d is thinking\n", p->info->start, p->id + 1);
 	ttl = p->ts_dead - micro_ts();
-//	ex_print("%ld, %d\n", p->ts_dead, p->id + 1);
 	micro_sleep(p, ttl / 2);
 }
 
