@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 06:58:35 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/18 09:57:09 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ int	main(int ac, char **av)
 	}
 	else
 		info.eat_count = -1;
-	info.start = micro_ts(0);
+	info.start = micro_ts();
 	pthread_mutex_init(&info.exit_l, NULL);
 	pthread_mutex_init(&info.waiter, NULL);
 	info.exit = 0;
