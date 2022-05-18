@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/13 23:50:25 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/18 05:27:20 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,6 @@ void	take_fork(t_philo *philo, t_mutex *lok);
 long	micro_ts();
 void	sleep_until(t_philo *philo, long ts);
 void	ex_print(char *fmt, long start, int id);
+void	avoid_lock(t_philo *p);
+void	micro_sleep(t_philo *p, long dur);
 #endif

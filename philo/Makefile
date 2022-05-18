@@ -1,4 +1,4 @@
-SRC		=  main.c parse_int.c philo.c
+SRC		=  main.c parse_int.c philo.c avoid_lock.c
 OBJ		= $(SRC:.c=.o)
 CFLAGS	= -g -Wall -Wextra -Werror -pthread
 NAME	= philo

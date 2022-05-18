@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   p.c                                            :+:      :+:    :+:   */
+/*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/04/14 02:28:53 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/18 05:26:12 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void	think(t_philo *p)
 
 	ex_print("%5ld %3d is thinking\n", p->info->start, p->id + 1);
 	ttl = p->ts_dead - micro_ts();
-	ex_print("%ld, %d\n", p->ts_dead, p->id + 1);
+//	ex_print("%ld, %d\n", p->ts_dead, p->id + 1);
 	micro_sleep(p, ttl / 2);
 }
 
@@ -105,6 +105,7 @@ void	philosopher(t_philo *p)
 	p->ts_dead = micro_ts() + p->info->time_to_die;
 	if (p->id & 1)
 		micro_sleep(p, p->info->eat_time);
+	avoid_lock(p);
 	while (check_dead(p, micro_ts()))
 	{
 		if (p->state == lock_Fork)
