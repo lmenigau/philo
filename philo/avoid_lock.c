@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 20:41:35 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 20:46:16 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,11 @@ void	unlock_forks(t_philo *p)
 
 int	check_dead(t_philo *p)
 {
-	_Bool test;
+	_Bool	test;
 
 	pthread_mutex_lock(&p->info->exit_l);
 	test = p->info->exit;
 	pthread_mutex_unlock(&p->info->exit_l);
-
 	if (!test)
 		return (1);
 	unlock_forks(p);
