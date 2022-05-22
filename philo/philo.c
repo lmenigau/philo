@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 02:22:33 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 13:39:59 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,13 @@ void	micro_sleep(t_philo *p, long dur)
 void	eat(t_philo *p)
 {
 	ex_print(
+		"%1$5ld %2$3d has taken a fork\n"
+		"%1$5ld %2$3d has taken a fork\n"
 		"%1$5ld %2$3d is eating\n",
 		p->info->start, p->id + 1);
-	p->last_meal = micro_ts();
-	p->ts_dead = p->last_meal + p->info->time_to_die;
+	pthread_mutex_lock(&p->lock);
+	p->ts_dead = micro_ts() + p->info->time_to_die;
+	pthread_mutex_unlock(&p->lock);
 	micro_sleep(p, p->info->eat_time);
 	pthread_mutex_unlock(&p->left->lock);
 	pthread_mutex_unlock(&p->right->lock);
@@ -71,11 +74,7 @@ void	philosopher(t_philo *p)
 		if (p->state == lock_Fork)
 		{
 			pthread_mutex_lock(&p->left->lock);
-			ex_print("%5ld %3d has taken a fork\n", p->info->start, p->id + 1);
 			pthread_mutex_lock(&p->right->lock);
-			ex_print("%5ld %3d has taken a fork\n", p->info->start, p->id + 1);
-			pthread_mutex_unlock(&p->right->lock);
-			pthread_mutex_unlock(&p->left->lock);
 		}
 		else if (p->state == eating)
 			eat(p);

@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 01:42:27 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 16:23:52 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,31 +66,13 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 			philos[i].left = &forks[i];
 			philos[i].right = &forks[(i + 1) % info->maxphil];
 		}
+		pthread_mutex_init(&philos[i].lock, NULL); 
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))
 			info->maxphil = i;
 		i++;
 	}
 }
-
-void	monitor(t_info *info, t_philo *philos)
-{
-	int		i;
-
-	i = 0;
-	while (1)
-	{
-		i = 0;
-		while (i < info->maxphil)
-		{
-			pthread_mutex_lock(&info->exit_l);
-			if (micro_ts() > philos[i].ts_dead)
-			pthread_mutex_unlock(&info->exit_l);
-			i++;
-		}
-	}
-}
-
 
 int	wait_philos(t_info *info, t_fork *forks)
 {

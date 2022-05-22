@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/21 10:01:14 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 16:24:12 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,31 @@ int	check_dead(t_philo *p, long now)
 	}
 	pthread_mutex_unlock(&p->info->exit_l);
 	return (1);
+}
+
+void	monitor(t_info *info, t_philo *philos)
+{
+	int		i;
+	_Bool	flag;
+
+	flag = 1;
+	while (flag)
+	{
+		i = 0;
+		while (flag && i < info->maxphil)
+		{
+			pthread_mutex_lock(&philos[i].lock);
+			if (micro_ts() > philos[i].ts_dead)
+			{
+				pthread_mutex_lock(&info->exit_l);
+				info->exit = 1;
+				flag = 0; 
+			}
+			pthread_mutex_unlock(&philos[i].lock);
+			i++;
+		}
+		ex_print("%6ld %3d died\n", info->start, i + 1);
+	}
 }
 
 void	avoid_lock(t_philo *p)

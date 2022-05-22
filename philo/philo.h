@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/18 06:12:21 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 16:25:04 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct s_philo
 	t_fork		*left;
 	t_fork		*right;
 	t_fork		*forks;
+	t_mutex		lock;
 	int			f_left;
 	int			f_right;
 	long		lock_time;
@@ -62,14 +63,15 @@ typedef struct s_philo
 	int			alive;
 }				t_philo;
 
-int		parse_int(char *str);
 int		arg_warn(int ac);
-void	philosopher(t_philo *philo);
-void	take_fork(t_philo *philo, t_mutex *lok);
-long	micro_ts(void);
-void	sleep_until(t_philo *philo, long ts);
-void	ex_print(char *fmt, long start, int id);
-void	avoid_lock(t_philo *p);
-void	micro_sleep(t_philo *p, long dur);
 int		check_dead(t_philo *p, long now);
+int		parse_int(char *str);
+long	micro_ts(void);
+void	avoid_lock(t_philo *p);
+void	ex_print(char *fmt, long start, int id);
+void	micro_sleep(t_philo *p, long dur);
+void	monitor(t_info *info, t_philo *philos);
+void	philosopher(t_philo *philo);
+void	sleep_until(t_philo *philo, long ts);
+void	take_fork(t_philo *philo, t_mutex *lok);
 #endif
