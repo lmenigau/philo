@@ -6,13 +6,14 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/18 09:57:09 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 01:42:27 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "philo.h"
 
 void	ex_print(char *fmt, long start, int id)
@@ -72,6 +73,25 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 	}
 }
 
+void	monitor(t_info *info, t_philo *philos)
+{
+	int		i;
+
+	i = 0;
+	while (1)
+	{
+		i = 0;
+		while (i < info->maxphil)
+		{
+			pthread_mutex_lock(&info->exit_l);
+			if (micro_ts() > philos[i].ts_dead)
+			pthread_mutex_unlock(&info->exit_l);
+			i++;
+		}
+	}
+}
+
+
 int	wait_philos(t_info *info, t_fork *forks)
 {
 	t_philo		*philos;
@@ -82,6 +102,7 @@ int	wait_philos(t_info *info, t_fork *forks)
 		return (1);
 	create_philos(info, philos, forks);
 	i = 0;
+	monitor(info, philos);
 	while (i < info->maxphil)
 	{
 		pthread_join(philos[i].thread, NULL);

@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/18 12:25:59 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/21 10:01:14 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,4 @@ void	avoid_lock(t_philo *p)
 		ex_print("%1$5ld %2$3d has taken a fork\n", p->info->start, p->id + 1);
 		micro_sleep(p, p->info->time_to_die);
 	}
-	if (p->info->maxphil & 1)
-		micro_sleep(p, p->info->eat_time);
 }
