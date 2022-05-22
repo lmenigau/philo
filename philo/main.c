@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 06:51:41 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 16:23:52 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 20:36:11 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ void	create_philos(t_info *info, t_philo *philos, t_fork *forks)
 			philos[i].right = &forks[(i + 1) % info->maxphil];
 		}
 		pthread_mutex_init(&philos[i].lock, NULL); 
+		philos[i].ts_dead = micro_ts() + info->time_to_die;
 		if (pthread_create(&philos[i].thread, NULL,
 				(void *)philosopher, &philos[i]))
 			info->maxphil = i;

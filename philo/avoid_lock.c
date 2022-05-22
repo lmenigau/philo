@@ -6,10 +6,11 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 16:24:12 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 20:41:35 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include "philo.h"
 
 void	unlock_forks(t_philo *p)
@@ -21,50 +22,51 @@ void	unlock_forks(t_philo *p)
 	}
 }
 
-int	check_dead(t_philo *p, long now)
+int	check_dead(t_philo *p)
 {
+	_Bool test;
+
 	pthread_mutex_lock(&p->info->exit_l);
-	if (p->info->exit)
-	{
-		pthread_mutex_unlock(&p->info->exit_l);
-		unlock_forks(p);
-		return (0);
-	}
-	else if (now > p->ts_dead)
-	{
-		p->info->exit = 1;
-		pthread_mutex_unlock(&p->info->exit_l);
-		ex_print("%5ld %3d died\n", p->info->start, p->id + 1);
-		unlock_forks(p);
-		return (0);
-	}
+	test = p->info->exit;
 	pthread_mutex_unlock(&p->info->exit_l);
+
+	if (!test)
+		return (1);
+	unlock_forks(p);
+	return (0);
+}
+
+_Bool	foreach_philo(t_info *info, t_philo *philos, int *id)
+{
+	int		i;
+	_Bool	test;
+
+	i = 0;
+	while (i < info->maxphil)
+	{
+		pthread_mutex_lock(&philos[i].lock);
+		test = micro_ts() > philos[i].ts_dead;
+		pthread_mutex_unlock(&philos[i].lock);
+		if (test)
+		{
+			*id = i;
+			pthread_mutex_lock(&info->exit_l);
+			info->exit = 1;
+			pthread_mutex_unlock(&info->exit_l);
+			return (0);
+		}
+		i++;
+	}
 	return (1);
 }
 
 void	monitor(t_info *info, t_philo *philos)
 {
-	int		i;
-	_Bool	flag;
+	int		id;
 
-	flag = 1;
-	while (flag)
-	{
-		i = 0;
-		while (flag && i < info->maxphil)
-		{
-			pthread_mutex_lock(&philos[i].lock);
-			if (micro_ts() > philos[i].ts_dead)
-			{
-				pthread_mutex_lock(&info->exit_l);
-				info->exit = 1;
-				flag = 0; 
-			}
-			pthread_mutex_unlock(&philos[i].lock);
-			i++;
-		}
-		ex_print("%6ld %3d died\n", info->start, i + 1);
-	}
+	while (foreach_philo(info, philos, &id))
+		usleep(2000);
+	ex_print("%5ld %3d has died\n", info->start, id + 1);
 }
 
 void	avoid_lock(t_philo *p)

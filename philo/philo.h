@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:02:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 16:25:04 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 20:08:26 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ typedef struct s_philo
 }				t_philo;
 
 int		arg_warn(int ac);
-int		check_dead(t_philo *p, long now);
+int		check_dead(t_philo *p);
 int		parse_int(char *str);
 long	micro_ts(void);
 void	avoid_lock(t_philo *p);

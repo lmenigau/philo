@@ -1,6 +1,6 @@
 SRC		=  main.c parse_int.c philo.c avoid_lock.c
 OBJ		= $(SRC:.c=.o)
-CFLAGS	= -g -Wall -Wextra -Werror -pthread
+CFLAGS	= $(DEBUG) -g -Wall -Wextra -Werror -pthread
 NAME	= philo
 CC		= clang
 ifeq  '$(shell ar V 2>/dev/null | head -c 3)' 'GNU'

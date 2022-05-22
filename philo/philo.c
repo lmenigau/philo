@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 13:39:59 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/22 20:08:52 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,11 +65,10 @@ void	think(t_philo *p)
 
 void	philosopher(t_philo *p)
 {
-	p->ts_dead = micro_ts() + p->info->time_to_die;
+	avoid_lock(p);
 	if (p->id & 1)
 		micro_sleep(p, p->info->eat_time);
-	avoid_lock(p);
-	while (check_dead(p, micro_ts()))
+	while (check_dead(p))
 	{
 		if (p->state == lock_Fork)
 		{
