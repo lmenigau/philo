@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/12 07:05:01 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 20:08:52 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/23 14:14:34 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,9 @@ void	eat(t_philo *p)
 	micro_sleep(p, p->info->eat_time);
 	pthread_mutex_unlock(&p->left->lock);
 	pthread_mutex_unlock(&p->right->lock);
+	pthread_mutex_lock(&p->lock);
+	p->counter--;
+	pthread_mutex_unlock(&p->lock);
 }
 
 void	think(t_philo *p)
@@ -79,7 +82,7 @@ void	philosopher(t_philo *p)
 			eat(p);
 		else if (p->state == sleeping)
 		{
-			if (--p->counter == 0)
+			if (p->counter == 0)
 				break ;
 			ex_print("%5ld %3d is sleeping\n", p->info->start, p->id + 1);
 			micro_sleep(p, p->info->sleep_time);

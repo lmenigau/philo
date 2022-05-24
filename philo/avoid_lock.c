@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/22 20:46:16 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/24 02:51:16 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,43 +29,50 @@ int	check_dead(t_philo *p)
 	pthread_mutex_lock(&p->info->exit_l);
 	test = p->info->exit;
 	pthread_mutex_unlock(&p->info->exit_l);
-	if (!test)
+	if (!test && micro_ts() < p->ts_dead)
 		return (1);
 	unlock_forks(p);
 	return (0);
 }
 
-_Bool	foreach_philo(t_info *info, t_philo *philos, int *id)
+_Bool	death_check(t_info *info, t_philo *philos, int *count, int i)
 {
-	int		i;
 	_Bool	test;
 
-	i = 0;
-	while (i < info->maxphil)
+	pthread_mutex_lock(&philos[i].lock);
+	test = micro_ts() > philos[i].ts_dead;
+	*count += philos[i].counter == 0;
+	pthread_mutex_unlock(&philos[i].lock);
+	if (test)
 	{
-		pthread_mutex_lock(&philos[i].lock);
-		test = micro_ts() > philos[i].ts_dead;
-		pthread_mutex_unlock(&philos[i].lock);
-		if (test)
-		{
-			*id = i;
-			pthread_mutex_lock(&info->exit_l);
-			info->exit = 1;
-			pthread_mutex_unlock(&info->exit_l);
-			return (0);
-		}
-		i++;
+		pthread_mutex_lock(&info->exit_l);
+		info->exit = 1;
+		pthread_mutex_unlock(&info->exit_l);
+		ex_print("%5ld %3d has died\n", info->start, i + 1);
+		return (1);
 	}
-	return (1);
+	return (0);
 }
 
 void	monitor(t_info *info, t_philo *philos)
 {
-	int		id;
-
-	while (foreach_philo(info, philos, &id))
+	int		i;
+	int		count;
+	
+	while (42)
+	{
 		usleep(2000);
-	ex_print("%5ld %3d has died\n", info->start, id + 1);
+		i = 0;
+		count = 0;
+		while (i < info->maxphil)
+		{	
+			if (death_check(info, philos, &count, i))
+				break ;
+			i++;
+		}
+		if (count == info->maxphil)
+			break ;
+	}
 }
 
 void	avoid_lock(t_philo *p)
