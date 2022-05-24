@@ -6,7 +6,7 @@
 /*   By: lomeniga <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 05:26:37 by lomeniga          #+#    #+#             */
-/*   Updated: 2022/05/24 02:54:18 by lomeniga         ###   ########.fr       */
+/*   Updated: 2022/05/24 03:01:40 by lomeniga         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void	monitor(t_info *info, t_philo *philos)
 		while (i < info->maxphil)
 		{	
 			if (death_check(info, philos, &count, i))
-				break ;
+				return ;
 			i++;
 		}
 		if (count == info->maxphil)
